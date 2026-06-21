@@ -177,6 +177,10 @@ body.is-light-active #lightButton {
   gap: var(--space-xs);
 }
 
+.controls-toggle {
+  display: none;
+}
+
 .installation {
   min-height: 0;
   display: grid;
@@ -326,6 +330,14 @@ h1 {
   align-self: start;
   padding: var(--space-sm);
   background: color-mix(in oklch, var(--color-bg) 58%, var(--color-surface) 42%);
+  transition: opacity 260ms var(--ease-out-quint), transform 360ms var(--ease-out-expo), visibility 260ms var(--ease-out-quint);
+}
+
+body.signals-hidden .signal-console {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(0.65rem) scale(0.985);
 }
 
 .console-heading {
@@ -442,16 +454,52 @@ h1 {
   }
 
   .topbar {
-    grid-template-columns: 1fr;
-    justify-items: start;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
   }
 
   .state-pill {
+    grid-column: 1 / -1;
     justify-self: start;
   }
 
+  .controls-toggle {
+    display: inline-flex;
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    min-height: 2.75rem;
+  }
+
   .control-row {
-    justify-content: flex-start;
+    position: fixed;
+    z-index: 4;
+    left: max(0.85rem, env(safe-area-inset-left));
+    right: max(0.85rem, env(safe-area-inset-right));
+    bottom: max(0.85rem, env(safe-area-inset-bottom));
+    display: none;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    justify-content: stretch;
+    gap: 0.55rem;
+    width: auto;
+    padding: 0.7rem;
+    border: 1px solid color-mix(in oklch, var(--color-accent) 24%, var(--line-soft));
+    border-radius: 16px;
+    background: color-mix(in oklch, var(--color-bg) 72%, var(--color-surface-strong) 28%);
+  }
+
+  body.controls-open .control-row {
+    display: grid;
+  }
+
+  .control-row .ghost-button {
+    min-height: 2.75rem;
+    padding-inline: 0.72rem;
+  }
+
+  body.controls-open .sound-hint {
+    opacity: 0;
+    pointer-events: none;
   }
 
   .installation {
@@ -494,9 +542,16 @@ h1 {
     width: 100%;
   }
 
-  .control-row,
+  .controls-toggle {
+    width: auto;
+  }
+
   .action-row {
     width: 100%;
+  }
+
+  .control-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

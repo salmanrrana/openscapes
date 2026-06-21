@@ -6,7 +6,9 @@
   const statePill = doc.getElementById("statePill");
   const soundHint = doc.getElementById("soundHint");
   const startButton = doc.getElementById("startButton");
+  const controlsButton = doc.getElementById("controlsButton");
   const infoButton = doc.getElementById("infoButton");
+  const signalsButton = doc.getElementById("signalsButton");
   const lightButton = doc.getElementById("lightButton");
   const muteButton = doc.getElementById("muteButton");
   const pauseButton = doc.getElementById("pauseButton");
@@ -77,6 +79,12 @@
     requestStart({ gesture: true, source: "button" });
   });
 
+  controlsButton.addEventListener("click", () => {
+    const open = root.classList.toggle("controls-open");
+    controlsButton.setAttribute("aria-expanded", String(open));
+    controlsButton.textContent = open ? "Close controls" : "Controls";
+  });
+
   lightButton.addEventListener("click", async () => {
     await requestStart({ gesture: true, source: "light button" });
     if (state.light.active) {
@@ -116,6 +124,12 @@
     const hidden = root.classList.toggle("notes-hidden");
     infoButton.setAttribute("aria-expanded", String(!hidden));
     infoButton.textContent = hidden ? "Show notes" : "Hide notes";
+  });
+
+  signalsButton.addEventListener("click", () => {
+    const hidden = root.classList.toggle("signals-hidden");
+    signalsButton.setAttribute("aria-expanded", String(!hidden));
+    signalsButton.textContent = hidden ? "Show signals" : "Hide signals";
   });
 
   doc.addEventListener("pointermove", (event) => {
@@ -610,7 +624,7 @@
         this.state.light.denied = true;
         root.classList.remove("is-light-active");
         lightButton.setAttribute("aria-pressed", "false");
-        lightButton.textContent = "Light instrument";
+        lightButton.textContent = "Light";
         setStatus(this.state.running ? "sound running" : "camera blocked");
         soundHint.textContent = "Camera access was blocked. The default no-permission soundscape still works.";
         renderSignals();
@@ -642,7 +656,7 @@
       this.state.light.movement = 0;
       root.classList.remove("is-light-active");
       lightButton.setAttribute("aria-pressed", "false");
-      lightButton.textContent = "Light instrument";
+      lightButton.textContent = "Light";
       setStatus(this.state.running ? "sound running" : "waiting for sound");
       soundHint.textContent = this.state.running
         ? "Click the field, drag slowly, or press Space to add a seed."

@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="color-scheme" content="dark">
     <meta name="theme-color" content="#05060a">
     <meta name="description" content="OpenScapes is a static browser audio installation that turns local no-permission browser signals into ambient sound.">
@@ -23,10 +23,12 @@
           <span class="state-light" aria-hidden="true"></span>
           <span id="stateText">trying autoplay</span>
         </div>
-        <div class="control-row">
+        <button class="ghost-button controls-toggle" id="controlsButton" type="button" aria-controls="controlRow" aria-expanded="false">Controls</button>
+        <div class="control-row" id="controlRow" aria-label="OpenScapes playback and display controls">
           <button class="ghost-button" id="infoButton" type="button" aria-expanded="true">Hide notes</button>
-          <button class="ghost-button" id="lightButton" type="button" aria-pressed="false">Light instrument</button>
-          <button class="ghost-button" id="seedButton" type="button">Drop center seed</button>
+          <button class="ghost-button" id="signalsButton" type="button" aria-controls="signalConsole" aria-expanded="true">Hide signals</button>
+          <button class="ghost-button" id="lightButton" type="button" aria-pressed="false">Light</button>
+          <button class="ghost-button" id="seedButton" type="button">Center seed</button>
           <button class="ghost-button" id="muteButton" type="button" aria-pressed="false">Mute</button>
           <button class="ghost-button" id="pauseButton" type="button" aria-pressed="false">Pause</button>
         </div>
@@ -63,7 +65,7 @@
           </p>
         </section>
 
-        <aside class="signal-console" aria-label="Live browser signal console">
+        <aside class="signal-console" id="signalConsole" aria-label="Live browser signal console">
           <div class="console-heading">
             <span>Signal console</span>
             <span id="seedReadout">seed pending</span>

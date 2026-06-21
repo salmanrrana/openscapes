@@ -1,0 +1,19 @@
+{
+  "name": "openscapes",
+  "version": "1.0.0",
+  "description": "A static browser audio installation generated from local no-permission signals.",
+  "type": "module",
+  "scripts": {
+    "dev": "python3 -m http.server 5173 --directory site",
+    "build": "node --check site/app.js && node tools/check-static.mjs",
+    "test": "npm run build"
+  },
+  "keywords": [
+    "web-audio",
+    "ambient",
+    "netlify",
+    "static-site"
+  ],
+  "author": "",
+  "license": "ISC"
+}

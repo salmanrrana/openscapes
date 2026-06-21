@@ -7,6 +7,7 @@
   const soundHint = doc.getElementById("soundHint");
   const startButton = doc.getElementById("startButton");
   const infoButton = doc.getElementById("infoButton");
+  const lightButton = doc.getElementById("lightButton");
   const muteButton = doc.getElementById("muteButton");
   const pauseButton = doc.getElementById("pauseButton");
   const seedButton = doc.getElementById("seedButton");
@@ -17,6 +18,9 @@
   const connectionSignal = doc.getElementById("connectionSignal");
   const jitterSignal = doc.getElementById("jitterSignal");
   const pointerSignal = doc.getElementById("pointerSignal");
+  const lightSignal = doc.getElementById("lightSignal");
+  const lightVideo = doc.getElementById("lightVideo");
+  const lightSampler = doc.getElementById("lightSampler");
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   const signals = collectSignals();
@@ -34,6 +38,16 @@
     energy: 0,
     jitter: 0,
     drift: 0,
+    light: {
+      active: false,
+      available: Boolean(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
+      denied: false,
+      brightness: 0,
+      hue: 0,
+      saturation: 0,
+      movement: 0,
+      color: [0, 0, 0]
+    },
     pointer: {
       active: false,
       x: window.innerWidth * 0.5,
@@ -51,6 +65,7 @@
 
   let visualStage;
   let audioEngine;
+  let lightInstrument;
 
   window.addEventListener("load", () => {
     window.setTimeout(() => {
@@ -60,6 +75,16 @@
 
   startButton.addEventListener("click", () => {
     requestStart({ gesture: true, source: "button" });
+  });
+
+  lightButton.addEventListener("click", async () => {
+    await requestStart({ gesture: true, source: "light button" });
+    if (state.light.active) {
+      lightInstrument.stop();
+    } else {
+      await lightInstrument.start();
+    }
+    renderSignals();
   });
 
   seedButton.addEventListener("click", async () => {
@@ -209,6 +234,15 @@
     pointerSignal.textContent = state.pointer.active
       ? `${Math.round(state.pointer.nx * 100)}% x, ${Math.round(state.pointer.ny * 100)}% y, speed ${formatNumber(state.pointer.speed, 2)}`
       : "dormant";
+    if (!state.light.available) {
+      lightSignal.textContent = "camera unavailable";
+    } else if (state.light.denied) {
+      lightSignal.textContent = "permission blocked";
+    } else if (!state.light.active) {
+      lightSignal.textContent = "camera off";
+    } else {
+      lightSignal.textContent = `${Math.round(state.light.brightness * 100)}% bright, hue ${Math.round(state.light.hue)}°, sat ${Math.round(state.light.saturation * 100)}%`;
+    }
   }
 
   function startJitterSampler() {
@@ -424,6 +458,15 @@
         [0.82 + Math.sin(t * 0.05) * 0.06, 0.28 + Math.cos(t * 0.09) * 0.04, 300, [20, 136, 132], 0.06],
         [0.46 + Math.sin(t * 0.04) * 0.07, 0.82 + Math.cos(t * 0.06) * 0.05, 420, [156, 28, 58], 0.07]
       ];
+      if (this.state.light.active) {
+        points.push([
+          0.5 + (this.state.light.hue / 360 - 0.5) * 0.34,
+          0.82 - this.state.light.brightness * 0.58,
+          220 + this.state.light.brightness * 270,
+          this.state.light.color,
+          0.045 + this.state.light.saturation * 0.105 + this.state.light.brightness * 0.045
+        ]);
+      }
       ctx.globalCompositeOperation = "screen";
       for (const [nx, ny, radius, color, alpha] of points) {
         const x = nx * this.width;
@@ -522,6 +565,164 @@
     }
   }
 
+  class LightInstrument {
+    constructor(sharedState, video, sampler, engine, stage) {
+      this.state = sharedState;
+      this.video = video;
+      this.sampler = sampler;
+      this.ctx = sampler.getContext("2d", { willReadFrequently: true });
+      this.audioEngine = engine;
+      this.visualStage = stage;
+      this.stream = null;
+      this.sampleTimer = 0;
+      this.lastBrightness = 0;
+      this.lastHue = 0;
+      this.lastSaturation = 0;
+      this.lastVisualBloom = 0;
+      this.sampler.width = 32;
+      this.sampler.height = 24;
+    }
+
+    async start() {
+      if (!this.state.light.available) {
+        setStatus("camera unavailable");
+        soundHint.textContent = "This browser does not expose camera access to the page.";
+        renderSignals();
+        return false;
+      }
+
+      setStatus("asking camera");
+      soundHint.textContent = "Your browser will ask for camera access. OpenScapes samples light and color only inside this page.";
+
+      try {
+        this.stream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 320 },
+            height: { ideal: 240 }
+          }
+        });
+        this.video.srcObject = this.stream;
+        await this.video.play();
+      } catch (_error) {
+        this.state.light.active = false;
+        this.state.light.denied = true;
+        root.classList.remove("is-light-active");
+        lightButton.setAttribute("aria-pressed", "false");
+        lightButton.textContent = "Light instrument";
+        setStatus(this.state.running ? "sound running" : "camera blocked");
+        soundHint.textContent = "Camera access was blocked. The default no-permission soundscape still works.";
+        renderSignals();
+        return false;
+      }
+
+      this.state.light.active = true;
+      this.state.light.denied = false;
+      root.classList.add("is-light-active");
+      lightButton.setAttribute("aria-pressed", "true");
+      lightButton.textContent = "Stop light";
+      setStatus("light instrument");
+      soundHint.textContent = "Camera light is now an instrument: move color, shadow, or brightness through the frame.";
+      this.sample();
+      renderSignals();
+      return true;
+    }
+
+    stop() {
+      window.clearTimeout(this.sampleTimer);
+      if (this.stream) {
+        for (const track of this.stream.getTracks()) track.stop();
+      }
+      this.stream = null;
+      this.video.srcObject = null;
+      this.state.light.active = false;
+      this.state.light.brightness = 0;
+      this.state.light.saturation = 0;
+      this.state.light.movement = 0;
+      root.classList.remove("is-light-active");
+      lightButton.setAttribute("aria-pressed", "false");
+      lightButton.textContent = "Light instrument";
+      setStatus(this.state.running ? "sound running" : "waiting for sound");
+      soundHint.textContent = this.state.running
+        ? "Click the field, drag slowly, or press Space to add a seed."
+        : "If the room is quiet, press Enter OpenScape or click the field.";
+      renderSignals();
+    }
+
+    sample() {
+      if (!this.state.light.active) return;
+
+      if (this.video.readyState >= 2 && this.video.videoWidth > 0) {
+        const width = this.sampler.width;
+        const height = this.sampler.height;
+        this.ctx.drawImage(this.video, 0, 0, width, height);
+        const pixels = this.ctx.getImageData(0, 0, width, height).data;
+        let r = 0;
+        let g = 0;
+        let b = 0;
+        let count = 0;
+        for (let i = 0; i < pixels.length; i += 16) {
+          r += pixels[i];
+          g += pixels[i + 1];
+          b += pixels[i + 2];
+          count += 1;
+        }
+        r /= count;
+        g /= count;
+        b /= count;
+        const [hue, saturation] = rgbToHsl(r, g, b);
+        const brightness = clamp((0.2126 * r + 0.7152 * g + 0.0722 * b) / 255, 0, 1);
+        const hueMove = Math.min(Math.abs(hue - this.lastHue), 360 - Math.abs(hue - this.lastHue)) / 180;
+        const movement = Math.min(1,
+          Math.abs(brightness - this.lastBrightness) * 2.4
+          + hueMove * 0.32
+          + Math.abs(saturation - this.lastSaturation) * 0.62
+        );
+
+        this.state.light.brightness = brightness;
+        this.state.light.hue = hue;
+        this.state.light.saturation = saturation;
+        this.state.light.movement = movement;
+        this.state.light.color = [Math.round(r), Math.round(g), Math.round(b)];
+        this.audioEngine.playLight(this.state.light);
+
+        const now = performance.now();
+        if (now - this.lastVisualBloom > 620 && (movement > 0.045 || brightness > 0.62 || saturation > 0.32)) {
+          const x = (hue / 360) * window.innerWidth;
+          const y = (1 - brightness) * window.innerHeight;
+          this.visualStage.addBloom(x, y, clamp(0.2 + movement * 2.8 + saturation * 0.38, 0.2, 0.94));
+          this.lastVisualBloom = now;
+        }
+
+        this.lastBrightness = brightness;
+        this.lastHue = hue;
+        this.lastSaturation = saturation;
+        renderSignals();
+      }
+
+      const delay = this.state.reducedMotion ? 260 : 120;
+      this.sampleTimer = window.setTimeout(() => window.requestAnimationFrame(() => this.sample()), delay);
+    }
+  }
+
+  function rgbToHsl(red, green, blue) {
+    const r = red / 255;
+    const g = green / 255;
+    const b = blue / 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const light = (max + min) / 2;
+    if (max === min) return [0, 0, light];
+    const delta = max - min;
+    const saturation = light > 0.5 ? delta / (2 - max - min) : delta / (max + min);
+    let hue;
+    if (max === r) hue = (g - b) / delta + (g < b ? 6 : 0);
+    else if (max === g) hue = (b - r) / delta + 2;
+    else hue = (r - g) / delta + 4;
+    return [hue * 60, saturation, light];
+  }
+
   class AudioEngine {
     constructor(sharedState) {
       this.state = sharedState;
@@ -537,6 +738,7 @@
       this.drones = [];
       this.started = false;
       this.pulseTimer = 0;
+      this.lastLightPulse = 0;
       this.volume = 0.46;
       this.scale = [1, 9 / 8, 5 / 4, 4 / 3, 3 / 2, 5 / 3, 15 / 8, 2];
       this.baseFrequency = 46 + (sharedState.seed % 39);
@@ -667,20 +869,24 @@
       if (!this.ctx || this.ctx.state !== "running" || this.state.paused) return;
       const now = this.ctx.currentTime;
       const pointer = this.state.pointer;
+      const light = this.state.light;
+      const lightHue = light.active ? light.hue / 360 : 0;
+      const lightBrightness = light.active ? light.brightness : 0;
       for (const drone of this.drones) {
-        const degreeShift = Math.floor((pointer.nx + this.state.random() * 0.35) * this.scale.length) % this.scale.length;
+        const degreeShift = Math.floor((pointer.nx * 0.7 + lightHue * 0.9 + this.state.random() * 0.35) * this.scale.length) % this.scale.length;
         const ratio = this.scale[(drone.index + degreeShift) % this.scale.length];
-        const brightness = 360 + (1 - pointer.ny) * 980 + this.state.jitter * 8;
-        drone.osc.frequency.setTargetAtTime(this.baseFrequency * ratio * drone.octave, now, 2.5);
+        const brightness = 360 + (1 - pointer.ny) * 820 + lightBrightness * 1550 + this.state.jitter * 8;
+        drone.osc.frequency.setTargetAtTime(this.baseFrequency * ratio * drone.octave * (1 + lightBrightness * 0.018), now, 2.5);
         drone.filter.frequency.setTargetAtTime(brightness, now, 2.2);
-        drone.gain.gain.setTargetAtTime(0.014 + this.state.energy * 0.018 + this.state.random() * 0.012, now, 2.8);
-        if (drone.panner) drone.panner.pan.setTargetAtTime((pointer.nx - 0.5) * 0.45 + (this.state.random() - 0.5) * 0.7, now, 2.4);
+        drone.gain.gain.setTargetAtTime(0.014 + this.state.energy * 0.018 + lightBrightness * 0.014 + this.state.random() * 0.012, now, 2.8);
+        if (drone.panner) drone.panner.pan.setTargetAtTime((pointer.nx - 0.5) * 0.34 + (lightHue - 0.5) * 0.42 + (this.state.random() - 0.5) * 0.46, now, 2.4);
       }
     }
 
     queuePulse() {
       window.clearTimeout(this.pulseTimer);
-      const wait = 1350 + this.state.random() * 3600 + Math.min(900, this.state.jitter * 35);
+      const light = this.state.light;
+      const wait = 1350 + this.state.random() * 3600 + Math.min(900, this.state.jitter * 35) - (light.active ? light.brightness * 520 : 0);
       this.pulseTimer = window.setTimeout(() => {
         if (this.ctx && this.ctx.state === "running" && !this.state.paused && !this.state.muted) {
           const x = this.state.random() * window.innerWidth;
@@ -709,6 +915,28 @@
       if (intensity > 0.72) {
         this.makeVoice(freq * (this.scale[(degree + 3) % this.scale.length] / this.scale[degree]), pan * -0.65, decay * 0.8, cutoff * 0.72, gainLevel * 0.42);
       }
+    }
+
+    playLight(light) {
+      if (!this.ctx || this.ctx.state !== "running" || this.state.paused || this.state.muted || !light.active) return;
+      const nowMs = performance.now();
+      const threshold = this.state.reducedMotion ? 640 : 340;
+      const shouldPulse = light.movement > 0.065 || (light.brightness > 0.68 && nowMs - this.lastLightPulse > 950);
+      if (!shouldPulse || nowMs - this.lastLightPulse < threshold) return;
+
+      const huePosition = light.hue / 360;
+      const degree = Math.floor(huePosition * this.scale.length) % this.scale.length;
+      const octave = light.brightness > 0.72 ? 2 : light.brightness > 0.34 ? 1 : 0.5;
+      const freq = this.baseFrequency * this.scale[degree] * octave * (1 + light.saturation * 0.035);
+      const pan = clamp(huePosition * 2 - 1, -1, 1);
+      const decay = 2.1 + light.brightness * 4.2 + light.saturation * 1.8;
+      const cutoff = 420 + light.brightness * 3300 + light.saturation * 900;
+      const gainLevel = 0.026 + light.movement * 0.09 + light.brightness * 0.032;
+      this.makeVoice(freq, pan, decay, cutoff, gainLevel);
+      if (light.saturation > 0.28 || light.movement > 0.18) {
+        this.makeVoice(freq * 1.5, pan * -0.5, decay * 0.72, cutoff * 0.74, gainLevel * 0.34);
+      }
+      this.lastLightPulse = nowMs;
     }
 
     makeVoice(freq, pan, decay, cutoff, gainLevel) {
@@ -766,6 +994,7 @@
 
   visualStage = new VisualStage(canvas, state);
   audioEngine = new AudioEngine(state);
+  lightInstrument = new LightInstrument(state, lightVideo, lightSampler, audioEngine, visualStage);
   visualStage.start();
   startJitterSampler();
   renderSignals();

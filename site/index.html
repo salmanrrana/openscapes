@@ -25,6 +25,7 @@
         </div>
         <div class="control-row">
           <button class="ghost-button" id="infoButton" type="button" aria-expanded="true">Hide notes</button>
+          <button class="ghost-button" id="lightButton" type="button" aria-pressed="false">Light instrument</button>
           <button class="ghost-button" id="seedButton" type="button">Drop center seed</button>
           <button class="ghost-button" id="muteButton" type="button" aria-pressed="false">Mute</button>
           <button class="ghost-button" id="pauseButton" type="button" aria-pressed="false">Pause</button>
@@ -92,6 +93,10 @@
               <dt>Pointer</dt>
               <dd id="pointerSignal">dormant</dd>
             </div>
+            <div>
+              <dt>Light</dt>
+              <dd id="lightSignal">camera off</dd>
+            </div>
           </dl>
         </aside>
       </main>
@@ -100,6 +105,9 @@
         If the room is quiet, press Enter OpenScape or click the field.
       </div>
     </div>
+
+    <video class="sensor-media" id="lightVideo" playsinline muted aria-hidden="true"></video>
+    <canvas class="sensor-media" id="lightSampler" aria-hidden="true"></canvas>
 
     <noscript>
       <div class="noscript-card">

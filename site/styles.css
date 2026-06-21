@@ -163,6 +163,12 @@ body.is-sound-blocked .state-light {
   background: var(--color-primary-soft);
 }
 
+body.is-light-active #lightButton {
+  border-color: color-mix(in oklch, var(--color-halo) 66%, transparent);
+  background: color-mix(in oklch, var(--color-halo) 24%, var(--color-bg) 76%);
+  color: var(--color-ink);
+}
+
 .control-row,
 .action-row {
   display: flex;
@@ -379,6 +385,16 @@ h1 {
   text-align: center;
   line-height: 1.45;
   transform: translateX(-50%);
+}
+
+.sensor-media {
+  position: fixed;
+  left: -2px;
+  bottom: -2px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .noscript-card {

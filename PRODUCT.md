@@ -10,7 +10,7 @@ Visitors who arrive from a personal portfolio, a shared link, or a late-night ra
 
 ## Product Purpose
 
-OpenScapes is a static web audio installation that turns local browser conditions into a gentle, unique soundscape. It does not inspect real network requests, Wi-Fi traffic, files, history, or private data. Instead, it uses no-permission browser signals like load timing, connection quality when exposed by the browser, CPU cores, device memory when available, screen size, pointer movement, click coordinates, clock drift, and performance jitter. Success means a visitor gets a calm but strange moment that could only have happened on their device, in that browser, at that time.
+OpenScapes is a static web audio installation that turns local browser conditions into a gentle, unique soundscape. It does not inspect real network requests, Wi-Fi traffic, files, history, or private data. Instead, it uses no-permission browser signals like load timing, connection quality when exposed by the browser, CPU cores, device memory when available, screen size, pointer movement, click coordinates, clock drift, and performance jitter. It also offers an opt-in Light instrument that samples camera brightness and color after permission. Success means a visitor gets a calm but strange moment that could only have happened on their device, in that browser, at that time.
 
 ## Brand Personality
 
@@ -25,9 +25,9 @@ Avoid SaaS landing pages, wellness-app beige, template card grids, corporate das
 1. Make the browser feel alive without crossing privacy lines.
 2. Start with calm, then let interaction add intensity.
 3. Explain the source signals plainly, then get out of the way.
-4. Treat every coordinate as musical material.
+4. Treat every coordinate, shadow, and color shift as musical material.
 5. Keep the whole project static, portable, and easy to deploy.
 
 ## Accessibility & Inclusion
 
-Audio should attempt to start automatically because the piece is sound-first, but browsers may require a user gesture. Provide a clear fallback control when autoplay is blocked. Keep pause and mute controls visible. Honor reduced motion by lowering visual density and motion speed. Avoid rapid flashes and high-frequency strobing. Preserve readable contrast for all explanatory text and controls.
+Audio should attempt to start automatically because the piece is sound-first, but browsers may require a user gesture. Provide a clear fallback control when autoplay is blocked. Keep pause and mute controls visible. Camera access must be explicitly started by the visitor and should fail gracefully when denied. Honor reduced motion by lowering visual density and motion speed. Avoid rapid flashes and high-frequency strobing. Preserve readable contrast for all explanatory text and controls.

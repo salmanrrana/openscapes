@@ -37,7 +37,7 @@ Use a no-external-asset stack for privacy and portability. Headings lean on Treb
 Single-page installation. Canvas is the stage. Interface floats in a deliberate two-part composition:
 
 - Intro panel: explains the signal sources and starts the soundscape.
-- Signal console: shows live local values and how interaction changes the composition.
+- Signal console: shows live local values, pointer state, and camera light state when the opt-in instrument is active.
 
 On small screens, controls stack at the bottom and the intro panel becomes a compact overlay.
 
@@ -50,5 +50,6 @@ Motion comes from the piece itself: slow fog drift, pointillist particle flow, c
 - Attempt autoplay on load.
 - If blocked, show a direct start button.
 - Pointer or touch position maps to pitch, stereo pan, envelope length, filter brightness, and visual bloom.
+- Light instrument asks for camera access only after the visitor presses the control. Average brightness opens filters and changes decay, hue selects pitch space and pan, saturation adds upper partials, and movement triggers soft light notes.
 - Pause and mute remain available after start.
 - Keyboard users can start audio with the primary button and trigger a centered sound seed with the Space key when the stage is focused.

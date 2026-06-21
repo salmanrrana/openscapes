@@ -8,6 +8,9 @@
     <meta name="description" content="OpenScapes is a static browser audio installation that turns local no-permission browser signals into ambient sound.">
     <title>OpenScapes</title>
     <link rel="icon" type="image/svg+xml" href="favicon-ecuador-urdu.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
@@ -23,10 +26,10 @@
           <span class="state-light" aria-hidden="true"></span>
           <span id="stateText">trying autoplay</span>
         </div>
-        <button class="ghost-button controls-toggle" id="controlsButton" type="button" aria-controls="controlRow" aria-expanded="false">Controls</button>
+        <button class="ghost-button controls-toggle" id="controlsButton" type="button" aria-controls="controlRow" aria-expanded="false">Tune</button>
         <div class="control-row" id="controlRow" aria-label="OpenScapes playback and display controls">
-          <button class="ghost-button" id="infoButton" type="button" aria-expanded="true">Hide notes</button>
-          <button class="ghost-button" id="signalsButton" type="button" aria-controls="signalConsole" aria-expanded="true">Hide signals</button>
+          <button class="ghost-button" id="infoButton" type="button" aria-expanded="true">Notes</button>
+          <button class="ghost-button" id="signalsButton" type="button" aria-controls="signalConsole" aria-expanded="true">Signals</button>
           <button class="ghost-button" id="lightButton" type="button" aria-pressed="false">Light</button>
           <button class="ghost-button" id="seedButton" type="button">Center seed</button>
           <button class="ghost-button" id="muteButton" type="button" aria-pressed="false">Mute</button>
@@ -36,22 +39,21 @@
 
       <main class="installation" id="intro">
         <section class="intro-panel" aria-labelledby="title">
-          <p class="kicker">A living ambient instrument</p>
-          <h1 id="title">OpenScapes is living.</h1>
+          <p class="kicker">A private score for this browser</p>
+          <h1 id="title">OpenScapes listens sideways.</h1>
           <p class="lede">
-            A lot is happening under the hood of every visit. OpenScapes reads the shape
-            of your local environment and turns that moment into sound.
+            Load time, screen shape, pointer drift, and optional room light become a slow
+            ambient field. The browser becomes the instrument.
           </p>
 
           <div class="signal-copy" aria-label="Signal explanation">
             <p>
-              The composition uses browser signals like load timing, connection hints,
-              screen size, device shape, clock drift, pointer motion, and camera light
-              when you turn the Light instrument on.
+              The composition reads no-permission hints: timing, connection quality when
+              exposed, device shape, clock drift, performance jitter, and touch or mouse motion.
             </p>
             <p>
-              It does not read real network requests, Wi-Fi traffic, browser history,
-              files, or private data. Your environment stays inside this page.
+              It does not inspect requests, Wi-Fi traffic, history, files, or private data.
+              Camera light joins only when you start the Light instrument.
             </p>
           </div>
 

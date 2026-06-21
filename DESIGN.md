@@ -2,7 +2,7 @@
 
 ## Theme
 
-A dark cosmic psychedelic fog installation: near-black space, pointillist particles, crimson signal blooms, ultraviolet haze, and cyan-green quiet energy. The visual field should feel painted and computational at the same time.
+A dark browser-audio installation: near-black space, pointillist particles, ultraviolet signal blooms, deep blue drift, and cyan glints. The visual field should feel painted and computational without splitting into static spotlight blobs.
 
 ## Color Palette
 
@@ -10,23 +10,24 @@ Use OKLCH tokens in CSS.
 
 ```css
 :root {
-  --color-bg: oklch(0.065 0 0);
-  --color-surface: oklch(0.145 0.032 285);
-  --color-surface-strong: oklch(0.205 0.047 295);
-  --color-ink: oklch(0.965 0.012 295);
-  --color-muted: oklch(0.735 0.035 300);
-  --color-primary: oklch(0.58 0.22 11);
-  --color-accent: oklch(0.76 0.17 176);
-  --color-violet: oklch(0.63 0.21 302);
-  --color-halo: oklch(0.86 0.14 105);
+  --color-bg: oklch(0.055 0.018 275);
+  --color-void: oklch(0.032 0.018 272);
+  --color-surface: oklch(0.13 0.046 282);
+  --color-surface-strong: oklch(0.19 0.07 286);
+  --color-ink: oklch(0.95 0.018 286);
+  --color-muted: oklch(0.72 0.045 282);
+  --color-primary: oklch(0.62 0.22 296);
+  --color-accent: oklch(0.76 0.15 220);
+  --color-violet: oklch(0.42 0.16 305);
+  --color-halo: oklch(0.72 0.16 245);
 }
 ```
 
-Primary crimson comes from the brand seed and appears as interaction blooms, hot dots, focus rings, and live audio status. Cyan-green is the quieter counterpoint for signal readouts and secondary controls. Violet owns the fog.
+Ultraviolet carries interaction blooms, hot dots, focus rings, and live audio status. Cyan-blue is the signal-readout counterpoint. Purple and blue haze move through the field instead of sitting as three separate spotlights.
 
 ## Typography
 
-Use a no-external-asset stack for privacy and portability. Headings lean on Trebuchet MS when available, then system sans. Body uses the same stack with lighter weight and generous line height for dark-mode readability.
+Use Fira Code from Google Fonts across the page. The monospaced texture should feel like an instrument readout without becoming a generic terminal costume.
 
 - Display: fluid, max 6rem, tight but not cramped.
 - Body: 1rem to 1.1rem, line-height around 1.65.
@@ -36,14 +37,15 @@ Use a no-external-asset stack for privacy and portability. Headings lean on Treb
 
 Single-page installation. Canvas is the stage. Interface floats in a deliberate two-part composition:
 
-- Intro panel: explains the signal sources and starts the soundscape.
-- Signal console: shows live local values, pointer state, and camera light state when the opt-in instrument is active.
+- Intro rail: explains the signal sources and starts the soundscape without a boxed card treatment.
+- Signal rail: shows live local values, pointer state, and camera light state with rule lines and a rounded colored top cap.
+- Control cluster: stays closed until the visitor asks for it.
 
-On small screens, controls stack at the bottom and the intro panel becomes a compact overlay.
+On small screens, controls open as a bottom instrument strip with a rounded blue-violet top border.
 
 ## Motion
 
-Motion comes from the piece itself: slow fog drift, pointillist particle flow, click blooms, and gentle UI state changes. Use reduced motion to lower particle count, reduce drift, and shorten bloom tails. No scroll reveal system.
+Motion comes from the piece itself: orbiting fog drift, breathing blue and violet washes, pointillist particle flow, click blooms, and gentle UI state changes. Use reduced motion to lower particle count, reduce drift, and shorten bloom tails. No scroll reveal system.
 
 ## Interaction
 

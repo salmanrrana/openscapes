@@ -1,17 +1,19 @@
 :root {
-  --color-bg: oklch(0.065 0 0);
-  --color-surface: oklch(0.145 0.032 285);
-  --color-surface-strong: oklch(0.205 0.047 295);
-  --color-ink: oklch(0.965 0.012 295);
-  --color-muted: oklch(0.735 0.035 300);
-  --color-primary: oklch(0.58 0.22 11);
-  --color-primary-soft: oklch(0.69 0.18 16);
-  --color-accent: oklch(0.76 0.17 176);
-  --color-violet: oklch(0.63 0.21 302);
-  --color-halo: oklch(0.86 0.14 105);
-  --line-soft: color-mix(in oklch, var(--color-muted) 24%, transparent);
-  --surface-wash: color-mix(in oklch, var(--color-surface) 76%, transparent);
-  --surface-deep: color-mix(in oklch, var(--color-bg) 58%, var(--color-surface) 42%);
+  --color-bg: oklch(0.055 0.018 275);
+  --color-void: oklch(0.032 0.018 272);
+  --color-surface: oklch(0.13 0.046 282);
+  --color-surface-strong: oklch(0.19 0.07 286);
+  --color-ink: oklch(0.95 0.018 286);
+  --color-muted: oklch(0.72 0.045 282);
+  --color-primary: oklch(0.62 0.22 296);
+  --color-primary-soft: oklch(0.7 0.18 272);
+  --color-accent: oklch(0.76 0.15 220);
+  --color-violet: oklch(0.42 0.16 305);
+  --color-halo: oklch(0.72 0.16 245);
+  --line-soft: color-mix(in oklch, var(--color-ink) 18%, transparent);
+  --line-hot: color-mix(in oklch, var(--color-accent) 68%, var(--color-primary) 32%);
+  --surface-wash: color-mix(in oklch, var(--color-bg) 76%, var(--color-surface) 24%);
+  --surface-deep: color-mix(in oklch, var(--color-void) 70%, var(--color-surface) 30%);
   --space-2xs: clamp(0.35rem, 0.28rem + 0.25vw, 0.55rem);
   --space-xs: clamp(0.55rem, 0.45rem + 0.35vw, 0.85rem);
   --space-sm: clamp(0.8rem, 0.66rem + 0.5vw, 1.15rem);
@@ -20,6 +22,7 @@
   --space-xl: clamp(2rem, 1.2rem + 3.8vw, 5.2rem);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --font-page: "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 }
 
 * {
@@ -38,12 +41,12 @@ body {
   margin: 0;
   overflow-x: hidden;
   background:
-    radial-gradient(circle at 12% 18%, oklch(0.34 0.18 302 / 0.36), transparent 28rem),
-    radial-gradient(circle at 88% 12%, oklch(0.42 0.19 176 / 0.22), transparent 26rem),
-    radial-gradient(circle at 52% 84%, oklch(0.34 0.21 11 / 0.32), transparent 31rem),
-    var(--color-bg);
+    radial-gradient(circle at 18% 23%, oklch(0.31 0.13 296 / 0.24), transparent 33rem),
+    radial-gradient(circle at 76% 28%, oklch(0.3 0.11 230 / 0.2), transparent 34rem),
+    radial-gradient(circle at 52% 88%, oklch(0.28 0.14 318 / 0.22), transparent 36rem),
+    linear-gradient(135deg, var(--color-void), var(--color-bg) 58%, oklch(0.075 0.028 295));
   color: var(--color-ink);
-  font-family: "Trebuchet MS", "Avenir Next", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-page);
   font-kerning: normal;
   text-rendering: optimizeLegibility;
 }
@@ -54,14 +57,14 @@ body::before {
   content: "";
   pointer-events: none;
   background:
-    radial-gradient(circle at 24% 31%, oklch(0.75 0.15 176 / 0.12), transparent 0.55rem),
-    radial-gradient(circle at 61% 26%, oklch(0.73 0.18 302 / 0.12), transparent 0.65rem),
-    radial-gradient(circle at 71% 67%, oklch(0.75 0.2 11 / 0.12), transparent 0.6rem),
-    radial-gradient(circle at 37% 78%, oklch(0.86 0.14 105 / 0.1), transparent 0.5rem),
-    radial-gradient(circle at 14% 62%, oklch(0.72 0.18 302 / 0.1), transparent 0.45rem);
+    radial-gradient(circle at 24% 31%, oklch(0.76 0.15 220 / 0.12), transparent 0.5rem),
+    radial-gradient(circle at 61% 26%, oklch(0.69 0.2 296 / 0.11), transparent 0.62rem),
+    radial-gradient(circle at 71% 67%, oklch(0.66 0.16 250 / 0.1), transparent 0.58rem),
+    radial-gradient(circle at 37% 78%, oklch(0.58 0.17 318 / 0.1), transparent 0.5rem),
+    radial-gradient(circle at 14% 62%, oklch(0.72 0.14 235 / 0.08), transparent 0.45rem);
   background-size: 13rem 11rem, 17rem 14rem, 19rem 16rem, 23rem 19rem, 29rem 31rem;
   mix-blend-mode: screen;
-  opacity: 0.72;
+  opacity: 0.54;
   transform: translate3d(0, 0, 0) rotate(0.001deg);
   animation: drift-field 34s var(--ease-out-quint) infinite alternate;
 }
@@ -104,8 +107,10 @@ a:focus-visible {
 }
 
 .topbar {
+  position: relative;
+  z-index: 5;
   display: grid;
-  grid-template-columns: minmax(10rem, 1fr) auto minmax(16rem, 1fr);
+  grid-template-columns: minmax(10rem, 1fr) auto auto;
   align-items: center;
   gap: var(--space-sm);
 }
@@ -117,8 +122,9 @@ a:focus-visible {
   gap: 0.72rem;
   color: var(--color-ink);
   text-decoration: none;
-  font-weight: 800;
-  letter-spacing: -0.03em;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  text-shadow: 0 0 18px oklch(0.12 0.05 20 / 0.74);
 }
 
 .wordmark-mark {
@@ -126,9 +132,10 @@ a:focus-visible {
   height: 1rem;
   border-radius: 999px;
   background:
-    radial-gradient(circle at 34% 31%, var(--color-halo), transparent 28%),
-    radial-gradient(circle at 66% 62%, var(--color-primary), transparent 42%),
+    radial-gradient(circle at 32% 28%, var(--color-accent), transparent 30%),
+    radial-gradient(circle at 68% 64%, var(--color-primary), transparent 46%),
     var(--color-violet);
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--color-accent) 34%, transparent);
 }
 
 .state-pill {
@@ -138,11 +145,11 @@ a:focus-visible {
   gap: 0.55rem;
   min-height: 2.5rem;
   padding: 0.42rem 0.82rem;
-  border: 1px solid var(--line-soft);
+  border: 1px solid color-mix(in oklch, var(--line-soft) 78%, var(--color-accent) 22%);
   border-radius: 999px;
-  background: color-mix(in oklch, var(--color-bg) 68%, var(--color-surface) 32%);
-  color: var(--color-muted);
-  font-size: 0.92rem;
+  background: color-mix(in oklch, var(--color-void) 72%, var(--color-surface) 28%);
+  color: color-mix(in oklch, var(--color-muted) 88%, var(--color-accent) 12%);
+  font-size: 0.86rem;
 }
 
 .state-light {
@@ -150,7 +157,7 @@ a:focus-visible {
   height: 0.68rem;
   border-radius: 999px;
   background: var(--color-primary);
-  opacity: 0.8;
+  opacity: 0.82;
   animation: pulse-light 2.2s var(--ease-out-quint) infinite;
 }
 
@@ -163,28 +170,71 @@ body.is-sound-blocked .state-light {
   background: var(--color-primary-soft);
 }
 
-body.is-light-active #lightButton {
-  border-color: color-mix(in oklch, var(--color-halo) 66%, transparent);
-  background: color-mix(in oklch, var(--color-halo) 24%, var(--color-bg) 76%);
-  color: var(--color-ink);
-}
-
 .control-row,
 .action-row {
   display: flex;
-  justify-content: flex-end;
   flex-wrap: wrap;
   gap: var(--space-xs);
 }
 
+.control-row {
+  position: fixed;
+  z-index: 6;
+  top: calc(var(--space-md) + 3.25rem);
+  right: var(--space-md);
+  width: min(42rem, calc(100vw - (var(--space-md) * 2)));
+  justify-content: flex-end;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-0.55rem) scale(0.985);
+  transition:
+    opacity 180ms var(--ease-out-quint),
+    visibility 180ms var(--ease-out-quint),
+    transform 260ms var(--ease-out-expo);
+}
+
+.control-row::before {
+  position: absolute;
+  inset: -0.62rem 0 auto auto;
+  width: min(32rem, 100%);
+  height: 1px;
+  content: "";
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--color-primary), var(--color-accent));
+  opacity: 0.9;
+}
+
+body.controls-open .control-row {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
 .controls-toggle {
-  display: none;
+  display: inline-flex;
+  justify-self: end;
+  gap: 0.62rem;
+  padding-inline: 1.08rem;
+  color: var(--color-ink);
+}
+
+.controls-toggle::before {
+  position: relative;
+  display: inline-block;
+  width: 0.48rem;
+  height: 0.48rem;
+  content: "";
+  border-radius: 999px;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--color-accent) 40%, transparent);
 }
 
 .installation {
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1.12fr) minmax(18rem, 0.58fr);
+  grid-template-columns: minmax(0, 1.1fr) minmax(18rem, 0.52fr);
   align-items: end;
   gap: var(--space-lg);
   padding-bottom: 3.8rem;
@@ -192,22 +242,36 @@ body.is-light-active #lightButton {
 }
 
 .intro-panel,
-.signal-console,
-.noscript-card {
-  border: 1px solid var(--line-soft);
-  border-radius: 16px;
-  background:
-    linear-gradient(145deg, color-mix(in oklch, var(--color-surface) 82%, transparent), color-mix(in oklch, var(--color-bg) 54%, var(--color-surface-strong) 46%));
+.signal-console {
+  position: relative;
 }
 
 .intro-panel {
-  max-width: 64rem;
-  padding: clamp(1.15rem, 2.2vw, 2.6rem);
-  transition: opacity 300ms var(--ease-out-quint), transform 420ms var(--ease-out-expo);
+  max-width: 62rem;
+  padding: clamp(0.5rem, 1.1vw, 1.4rem) clamp(0.5rem, 1.4vw, 1.6rem) clamp(0.5rem, 1.3vw, 1.4rem) clamp(1.25rem, 2vw, 2.1rem);
+  transition: opacity 300ms var(--ease-out-quint), transform 420ms var(--ease-out-expo), visibility 300ms var(--ease-out-quint);
+}
+
+.intro-panel::before {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  content: "";
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in oklch, var(--color-accent) 72%, transparent) 18%,
+    color-mix(in oklch, var(--color-primary) 62%, transparent) 62%,
+    transparent
+  );
+  opacity: 0.72;
 }
 
 body.is-sound-running .intro-panel {
-  opacity: 0.9;
+  opacity: 0.86;
   transform: translateY(0.35rem);
 }
 
@@ -222,45 +286,43 @@ body.notes-hidden .intro-panel {
   max-width: 36rem;
   margin: 0 0 var(--space-sm);
   color: var(--color-accent);
-  font-size: clamp(0.95rem, 0.86rem + 0.35vw, 1.15rem);
-  font-weight: 700;
+  font-size: clamp(0.9rem, 0.84rem + 0.3vw, 1.08rem);
+  font-weight: 600;
 }
 
 h1 {
-  max-width: 11ch;
+  max-width: 12ch;
   margin: 0;
   color: var(--color-ink);
-  font-size: clamp(3.1rem, 12vw, 5.8rem);
-  line-height: 0.95;
-  letter-spacing: -0.037em;
+  font-size: clamp(2.8rem, 9vw, 5.65rem);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
   text-wrap: balance;
 }
 
 .lede {
-  max-width: 58ch;
+  max-width: 64ch;
   margin: var(--space-md) 0 0;
   color: var(--color-ink);
-  font-size: clamp(1.08rem, 1rem + 0.45vw, 1.36rem);
-  line-height: 1.55;
+  font-size: clamp(1.02rem, 0.95rem + 0.42vw, 1.28rem);
+  line-height: 1.68;
   text-wrap: pretty;
 }
 
 .signal-copy {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
-  gap: var(--space-sm);
+  gap: var(--space-md);
   margin: var(--space-lg) 0 0;
 }
 
 .signal-copy p {
   min-height: 100%;
   margin: 0;
-  padding: var(--space-sm);
-  border: 1px solid color-mix(in oklch, var(--color-accent) 22%, transparent);
-  border-radius: 14px;
-  background: color-mix(in oklch, var(--color-bg) 62%, var(--color-surface) 38%);
+  padding: var(--space-xs) 0 0;
+  border-top: 1px solid color-mix(in oklch, var(--color-accent) 38%, transparent);
   color: color-mix(in oklch, var(--color-ink) 88%, var(--color-accent) 12%);
-  line-height: 1.62;
+  line-height: 1.7;
 }
 
 .action-row {
@@ -271,32 +333,75 @@ h1 {
 .primary-button,
 .secondary-button,
 .ghost-button {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-width: 0;
   border-radius: 999px;
   padding: 0.78rem 1.08rem;
-  transition: transform 160ms var(--ease-out-quint), background-color 220ms var(--ease-out-quint), color 220ms var(--ease-out-quint), border-color 220ms var(--ease-out-quint);
+  overflow: hidden;
+  transition:
+    transform 160ms var(--ease-out-quint),
+    background-color 220ms var(--ease-out-quint),
+    color 220ms var(--ease-out-quint),
+    border-color 220ms var(--ease-out-quint);
+}
+
+.primary-button::after,
+.ghost-button::after {
+  position: absolute;
+  left: 0.9rem;
+  right: 0.9rem;
+  top: -1px;
+  height: 1px;
+  content: "";
+  border-radius: 999px;
+  background: var(--line-hot);
+  opacity: 0.68;
+  transform: scaleX(0.35);
+  transform-origin: center;
+  transition: transform 220ms var(--ease-out-quint), opacity 220ms var(--ease-out-quint);
 }
 
 .primary-button {
-  background: var(--color-primary);
-  color: white;
-  font-weight: 800;
+  border: 1px solid color-mix(in oklch, var(--color-primary) 72%, var(--color-accent) 28%);
+  background: linear-gradient(90deg, var(--color-primary), color-mix(in oklch, var(--color-primary-soft) 82%, var(--color-accent) 18%));
+  color: oklch(0.985 0.01 76);
+  font-weight: 700;
 }
 
 .secondary-button,
 .ghost-button {
   border: 1px solid var(--line-soft);
-  background: color-mix(in oklch, var(--color-bg) 74%, var(--color-surface) 26%);
-  color: var(--color-ink);
+  background: color-mix(in oklch, var(--color-void) 82%, var(--color-surface) 18%);
+  color: color-mix(in oklch, var(--color-muted) 90%, var(--color-ink) 10%);
 }
 
 .ghost-button {
   min-height: 2.5rem;
   padding: 0.58rem 0.86rem;
-  color: var(--color-muted);
-  font-size: 0.92rem;
+  font-size: 0.88rem;
+}
+
+.ghost-button[aria-expanded="true"],
+.ghost-button[aria-pressed="true"] {
+  border-color: color-mix(in oklch, var(--color-accent) 54%, var(--line-soft));
+  background: color-mix(in oklch, var(--color-bg) 70%, var(--color-surface-strong) 30%);
+  color: var(--color-ink);
+}
+
+.ghost-button[aria-expanded="true"]::after,
+.ghost-button[aria-pressed="true"]::after,
+.primary-button::after {
+  opacity: 1;
+  transform: scaleX(0.82);
+}
+
+body.is-light-active #lightButton {
+  border-color: color-mix(in oklch, var(--color-accent) 66%, transparent);
+  background: color-mix(in oklch, var(--color-accent) 18%, var(--color-bg) 82%);
+  color: var(--color-ink);
 }
 
 @media (hover: hover) {
@@ -308,8 +413,14 @@ h1 {
 
   .secondary-button:hover,
   .ghost-button:hover {
-    border-color: color-mix(in oklch, var(--color-accent) 54%, var(--line-soft));
+    border-color: color-mix(in oklch, var(--color-accent) 58%, var(--line-soft));
     color: var(--color-ink);
+  }
+
+  .ghost-button:hover::after,
+  .primary-button:hover::after {
+    opacity: 1;
+    transform: scaleX(0.92);
   }
 }
 
@@ -320,17 +431,39 @@ h1 {
 }
 
 .interaction-note {
-  max-width: 46rem;
+  max-width: 48rem;
   margin: var(--space-sm) 0 0;
-  color: var(--color-muted);
-  line-height: 1.65;
+  color: color-mix(in oklch, var(--color-muted) 92%, var(--color-accent) 8%);
+  line-height: 1.68;
 }
 
 .signal-console {
   align-self: start;
-  padding: var(--space-sm);
-  background: color-mix(in oklch, var(--color-bg) 58%, var(--color-surface) 42%);
+  max-width: 31rem;
+  padding: 1rem 0 0 1.15rem;
   transition: opacity 260ms var(--ease-out-quint), transform 360ms var(--ease-out-expo), visibility 260ms var(--ease-out-quint);
+}
+
+.signal-console::before {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  content: "";
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--color-accent), color-mix(in oklch, var(--color-primary) 68%, transparent), transparent);
+}
+
+.signal-console::after {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  content: "";
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-primary), transparent 86%);
 }
 
 body.signals-hidden .signal-console {
@@ -346,13 +479,13 @@ body.signals-hidden .signal-console {
   gap: var(--space-sm);
   padding: 0 0 var(--space-xs);
   color: var(--color-ink);
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  letter-spacing: -0.025em;
 }
 
 .console-heading span:last-child {
   color: var(--color-accent);
-  font-weight: 700;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
@@ -364,15 +497,15 @@ body.signals-hidden .signal-console {
 
 .signal-list > div {
   display: grid;
-  grid-template-columns: 6.4rem minmax(0, 1fr);
+  grid-template-columns: 6.2rem minmax(0, 1fr);
   gap: var(--space-sm);
   padding: var(--space-xs) 0;
-  border-top: 1px solid color-mix(in oklch, var(--color-muted) 18%, transparent);
+  border-top: 1px solid color-mix(in oklch, var(--color-ink) 11%, transparent);
 }
 
 .signal-list dt {
-  color: var(--color-muted);
-  font-size: 0.9rem;
+  color: color-mix(in oklch, var(--color-muted) 82%, var(--color-accent) 18%);
+  font-size: 0.86rem;
 }
 
 .signal-list dd {
@@ -387,16 +520,24 @@ body.signals-hidden .signal-console {
   z-index: 2;
   left: 50%;
   bottom: max(0.8rem, env(safe-area-inset-bottom));
-  width: min(calc(100vw - 2rem), 42rem);
-  max-width: 42rem;
-  padding: 0.62rem 0.9rem;
-  border: 1px solid color-mix(in oklch, var(--color-primary) 26%, transparent);
-  border-radius: 999px;
-  background: color-mix(in oklch, var(--color-bg) 78%, var(--color-primary) 22%);
-  color: color-mix(in oklch, var(--color-ink) 88%, var(--color-primary) 12%);
+  width: min(calc(100vw - 2rem), 46rem);
+  max-width: 46rem;
+  padding: 0.64rem 1rem 0.42rem;
+  color: color-mix(in oklch, var(--color-ink) 88%, var(--color-accent) 12%);
   text-align: center;
-  line-height: 1.45;
+  line-height: 1.5;
   transform: translateX(-50%);
+}
+
+.sound-hint::before {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  content: "";
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--color-primary), var(--color-accent), transparent);
 }
 
 .sensor-media {
@@ -415,6 +556,9 @@ body.signals-hidden .signal-console {
   z-index: 3;
   max-width: 34rem;
   padding: var(--space-md);
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  background: var(--surface-deep);
 }
 
 .noscript-card h2,
@@ -460,11 +604,11 @@ body.signals-hidden .signal-console {
 
   .state-pill {
     grid-column: 1 / -1;
+    grid-row: 2;
     justify-self: start;
   }
 
   .controls-toggle {
-    display: inline-flex;
     grid-column: 2;
     grid-row: 1;
     justify-self: end;
@@ -472,24 +616,26 @@ body.signals-hidden .signal-console {
   }
 
   .control-row {
-    position: fixed;
-    z-index: 4;
+    top: auto;
     left: max(0.85rem, env(safe-area-inset-left));
     right: max(0.85rem, env(safe-area-inset-right));
     bottom: max(0.85rem, env(safe-area-inset-bottom));
-    display: none;
+    display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     justify-content: stretch;
     gap: 0.55rem;
     width: auto;
-    padding: 0.7rem;
-    border: 1px solid color-mix(in oklch, var(--color-accent) 24%, var(--line-soft));
-    border-radius: 16px;
-    background: color-mix(in oklch, var(--color-bg) 72%, var(--color-surface-strong) 28%);
+    padding: 0.75rem;
+    border: 1px solid color-mix(in oklch, var(--line-soft) 78%, var(--color-accent) 22%);
+    border-top-color: var(--line-hot);
+    border-radius: 18px 18px 12px 12px;
+    background: color-mix(in oklch, var(--color-void) 90%, var(--color-surface-strong) 10%);
   }
 
-  body.controls-open .control-row {
-    display: grid;
+  .control-row::before {
+    inset: -1px 0 auto 0;
+    width: auto;
+    background: linear-gradient(90deg, transparent, var(--color-primary), var(--color-accent), transparent);
   }
 
   .control-row .ghost-button {
@@ -511,8 +657,13 @@ body.signals-hidden .signal-console {
     overflow: auto;
   }
 
+  .intro-panel {
+    max-width: 100%;
+  }
+
   .signal-console {
     width: 100%;
+    max-width: 100%;
   }
 }
 
@@ -521,14 +672,18 @@ body.signals-hidden .signal-console {
     gap: var(--space-md);
   }
 
-  h1 {
-    max-width: 9ch;
-    font-size: clamp(2.75rem, 17vw, 4.8rem);
+  .wordmark {
+    gap: 0.55rem;
+    letter-spacing: -0.04em;
   }
 
-  .intro-panel,
-  .signal-console {
-    border-radius: 14px;
+  .state-pill {
+    font-size: 0.82rem;
+  }
+
+  h1 {
+    max-width: 10ch;
+    font-size: clamp(2.35rem, 15vw, 4.35rem);
   }
 
   .signal-list > div {

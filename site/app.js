@@ -80,9 +80,7 @@
   });
 
   controlsButton.addEventListener("click", () => {
-    const open = root.classList.toggle("controls-open");
-    controlsButton.setAttribute("aria-expanded", String(open));
-    controlsButton.textContent = open ? "Close controls" : "Controls";
+    setControlsOpen(!root.classList.contains("controls-open"));
   });
 
   lightButton.addEventListener("click", async () => {
@@ -123,13 +121,13 @@
   infoButton.addEventListener("click", () => {
     const hidden = root.classList.toggle("notes-hidden");
     infoButton.setAttribute("aria-expanded", String(!hidden));
-    infoButton.textContent = hidden ? "Show notes" : "Hide notes";
+    infoButton.textContent = "Notes";
   });
 
   signalsButton.addEventListener("click", () => {
     const hidden = root.classList.toggle("signals-hidden");
     signalsButton.setAttribute("aria-expanded", String(!hidden));
-    signalsButton.textContent = hidden ? "Show signals" : "Hide signals";
+    signalsButton.textContent = "Signals";
   });
 
   doc.addEventListener("pointermove", (event) => {
@@ -140,6 +138,10 @@
   }, { passive: true });
 
   doc.addEventListener("pointerdown", async (event) => {
+    const insideControls = event.target && event.target.closest("#controlRow, #controlsButton");
+    if (root.classList.contains("controls-open") && !insideControls) {
+      setControlsOpen(false);
+    }
     updatePointer(event.clientX, event.clientY);
     if (isControlEvent(event)) return;
     await requestStart({ gesture: true, source: "field" });
@@ -147,6 +149,10 @@
   });
 
   doc.addEventListener("keydown", async (event) => {
+    if (event.key === "Escape") {
+      setControlsOpen(false);
+      return;
+    }
     const tag = event.target && event.target.tagName ? event.target.tagName.toLowerCase() : "";
     if (["a", "button", "input", "select", "textarea"].includes(tag)) return;
     if (event.key === " " || event.key === "Spacebar") {
@@ -199,13 +205,19 @@
     return false;
   }
 
+  function setControlsOpen(open) {
+    root.classList.toggle("controls-open", open);
+    controlsButton.setAttribute("aria-expanded", String(open));
+    controlsButton.textContent = open ? "Close" : "Tune";
+  }
+
   function setStatus(text) {
     stateText.textContent = text;
     root.classList.toggle("is-sound-paused", text === "paused" || text === "muted");
   }
 
   function isControlEvent(event) {
-    return Boolean(event.target && event.target.closest("button, a, .intro-panel, .signal-console"));
+    return Boolean(event.target && event.target.closest("button, a, .topbar, .control-row, .intro-panel, .signal-console"));
   }
 
   function updatePointer(x, y) {
@@ -346,11 +358,11 @@
       this.lastTime = 0;
       this.lastPaint = 0;
       this.palette = [
-        [236, 58, 88],
-        [151, 92, 255],
-        [42, 232, 204],
-        [218, 248, 102],
-        [255, 150, 93]
+        [118, 89, 255],
+        [72, 139, 255],
+        [44, 214, 238],
+        [187, 82, 255],
+        [116, 99, 178]
       ];
       this.resize = this.resize.bind(this);
       this.draw = this.draw.bind(this);
@@ -399,7 +411,7 @@
     paintBase() {
       const ctx = this.ctx;
       ctx.globalCompositeOperation = "source-over";
-      ctx.fillStyle = "rgb(5, 5, 8)";
+      ctx.fillStyle = "rgb(5, 4, 6)";
       ctx.fillRect(0, 0, this.width, this.height);
     }
 
@@ -455,7 +467,7 @@
       const fade = this.state.reducedMotion ? 0.2 : 0.105 - this.state.energy * 0.03;
 
       ctx.globalCompositeOperation = "source-over";
-      ctx.fillStyle = `rgba(5, 5, 8, ${clamp(fade, 0.055, 0.24)})`;
+      ctx.fillStyle = `rgba(5, 4, 6, ${clamp(fade, 0.055, 0.24)})`;
       ctx.fillRect(0, 0, this.width, this.height);
 
       this.drawFog(ctx, t);
@@ -468,9 +480,34 @@
 
     drawFog(ctx, t) {
       const points = [
-        [0.2 + Math.sin(t * 0.07) * 0.08, 0.18 + Math.cos(t * 0.05) * 0.06, 360, [90, 44, 160], 0.08],
-        [0.82 + Math.sin(t * 0.05) * 0.06, 0.28 + Math.cos(t * 0.09) * 0.04, 300, [20, 136, 132], 0.06],
-        [0.46 + Math.sin(t * 0.04) * 0.07, 0.82 + Math.cos(t * 0.06) * 0.05, 420, [156, 28, 58], 0.07]
+        [
+          0.18 + Math.sin(t * 0.13) * 0.12 + Math.cos(t * 0.041) * 0.05,
+          0.22 + Math.cos(t * 0.1) * 0.09 + Math.sin(t * 0.052) * 0.04,
+          440 + Math.sin(t * 0.17) * 82,
+          [76, 48, 172],
+          0.052 + Math.sin(t * 0.19) * 0.012
+        ],
+        [
+          0.79 + Math.sin(t * 0.095) * 0.1 + Math.cos(t * 0.033) * 0.04,
+          0.3 + Math.cos(t * 0.12) * 0.085 + Math.sin(t * 0.047) * 0.05,
+          390 + Math.cos(t * 0.16) * 72,
+          [34, 92, 180],
+          0.047 + Math.cos(t * 0.18) * 0.011
+        ],
+        [
+          0.48 + Math.sin(t * 0.082) * 0.11 + Math.cos(t * 0.037) * 0.07,
+          0.82 + Math.cos(t * 0.088) * 0.1 + Math.sin(t * 0.061) * 0.04,
+          500 + Math.sin(t * 0.14 + 1.4) * 92,
+          [122, 46, 178],
+          0.05 + Math.sin(t * 0.15 + 0.8) * 0.012
+        ],
+        [
+          0.57 + Math.sin(t * 0.046) * 0.16,
+          0.52 + Math.cos(t * 0.058) * 0.11,
+          620 + Math.cos(t * 0.1) * 120,
+          [28, 64, 120],
+          0.027 + Math.sin(t * 0.12) * 0.006
+        ]
       ];
       if (this.state.light.active) {
         points.push([

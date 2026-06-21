@@ -685,6 +685,7 @@
         this.state.light.saturation = saturation;
         this.state.light.movement = movement;
         this.state.light.color = [Math.round(r), Math.round(g), Math.round(b)];
+        this.audioEngine.updateLight(this.state.light);
         this.audioEngine.playLight(this.state.light);
 
         const now = performance.now();
@@ -739,6 +740,13 @@
       this.started = false;
       this.pulseTimer = 0;
       this.lastLightPulse = 0;
+      this.lightControl = {
+        brightness: 0,
+        hue: 0,
+        saturation: 0,
+        movement: 0,
+        contrast: 0
+      };
       this.volume = 0.46;
       this.scale = [1, 9 / 8, 5 / 4, 4 / 3, 3 / 2, 5 / 3, 15 / 8, 2];
       this.baseFrequency = 46 + (sharedState.seed % 39);
@@ -865,6 +873,50 @@
       window.setInterval(() => this.morphDrones(), 5200);
     }
 
+    updateLight(light) {
+      if (!this.ctx || this.ctx.state !== "running" || this.state.paused || !light.active) return;
+      const now = this.ctx.currentTime;
+      const brightness = clamp(light.brightness, 0, 1);
+      const hue = clamp(light.hue / 360, 0, 1);
+      const saturation = clamp(light.saturation, 0, 1);
+      const movement = clamp(light.movement, 0, 1);
+      const contrast = Math.abs(brightness - 0.5) * 2;
+      const darkness = 1 - brightness;
+      const smoothing = 0.26;
+
+      this.lightControl.brightness += (brightness - this.lightControl.brightness) * smoothing;
+      this.lightControl.hue += (hue - this.lightControl.hue) * smoothing;
+      this.lightControl.saturation += (saturation - this.lightControl.saturation) * smoothing;
+      this.lightControl.movement += (movement - this.lightControl.movement) * 0.38;
+      this.lightControl.contrast += (contrast - this.lightControl.contrast) * smoothing;
+
+      for (const drone of this.drones) {
+        const degreeShift = Math.floor((this.lightControl.hue * 1.35 + drone.index * 0.19) * this.scale.length) % this.scale.length;
+        const ratio = this.scale[(drone.index + degreeShift) % this.scale.length];
+        const octaveTilt = 1 + (brightness - 0.5) * 0.09 + saturation * 0.025;
+        const filterTarget = 170 + brightness * 4200 + saturation * 1450 + movement * 2200;
+        const gainTarget = 0.012
+          + brightness * 0.025
+          + darkness * 0.01
+          + saturation * 0.012
+          + movement * 0.026;
+        drone.osc.frequency.setTargetAtTime(this.baseFrequency * ratio * drone.octave * octaveTilt, now, 0.62);
+        drone.filter.frequency.setTargetAtTime(filterTarget, now, 0.42);
+        drone.filter.Q.setTargetAtTime(0.72 + saturation * 3.4 + contrast * 1.1, now, 0.5);
+        drone.gain.gain.setTargetAtTime(gainTarget, now, 0.54);
+        if (drone.panner) {
+          const panTarget = clamp((this.lightControl.hue - 0.5) * 1.15 + (drone.index % 2 ? -0.18 : 0.18), -0.95, 0.95);
+          drone.panner.pan.setTargetAtTime(panTarget, now, 0.56);
+        }
+      }
+
+      if (this.delay && this.feedback && this.wet) {
+        this.delay.delayTime.setTargetAtTime(0.42 + darkness * 0.52 + saturation * 0.18, now, 0.74);
+        this.feedback.gain.setTargetAtTime(0.22 + darkness * 0.18 + saturation * 0.08, now, 0.86);
+        this.wet.gain.setTargetAtTime(0.18 + brightness * 0.18 + movement * 0.16, now, 0.64);
+      }
+    }
+
     morphDrones() {
       if (!this.ctx || this.ctx.state !== "running" || this.state.paused) return;
       const now = this.ctx.currentTime;
@@ -920,20 +972,23 @@
     playLight(light) {
       if (!this.ctx || this.ctx.state !== "running" || this.state.paused || this.state.muted || !light.active) return;
       const nowMs = performance.now();
-      const threshold = this.state.reducedMotion ? 640 : 340;
-      const shouldPulse = light.movement > 0.065 || (light.brightness > 0.68 && nowMs - this.lastLightPulse > 950);
+      const threshold = this.state.reducedMotion ? 760 : 260;
+      const extremeLight = light.brightness > 0.74 || light.brightness < 0.18;
+      const colorShift = light.saturation > 0.22 && light.movement > 0.025;
+      const shouldPulse = light.movement > 0.032 || colorShift || (extremeLight && nowMs - this.lastLightPulse > 720);
       if (!shouldPulse || nowMs - this.lastLightPulse < threshold) return;
 
       const huePosition = light.hue / 360;
       const degree = Math.floor(huePosition * this.scale.length) % this.scale.length;
-      const octave = light.brightness > 0.72 ? 2 : light.brightness > 0.34 ? 1 : 0.5;
-      const freq = this.baseFrequency * this.scale[degree] * octave * (1 + light.saturation * 0.035);
-      const pan = clamp(huePosition * 2 - 1, -1, 1);
-      const decay = 2.1 + light.brightness * 4.2 + light.saturation * 1.8;
-      const cutoff = 420 + light.brightness * 3300 + light.saturation * 900;
-      const gainLevel = 0.026 + light.movement * 0.09 + light.brightness * 0.032;
+      const octave = light.brightness > 0.72 ? 2 : light.brightness > 0.28 ? 1 : 0.5;
+      const darkness = 1 - light.brightness;
+      const freq = this.baseFrequency * this.scale[degree] * octave * (1 + light.saturation * 0.055 - darkness * 0.018);
+      const pan = clamp(huePosition * 2 - 1 + (light.brightness - 0.5) * 0.22, -1, 1);
+      const decay = 1.8 + light.brightness * 4.8 + darkness * 2.3 + light.saturation * 2.1;
+      const cutoff = 220 + light.brightness * 5200 + light.saturation * 1500 + light.movement * 1800;
+      const gainLevel = 0.04 + light.movement * 0.13 + light.brightness * 0.055 + darkness * 0.018;
       this.makeVoice(freq, pan, decay, cutoff, gainLevel);
-      if (light.saturation > 0.28 || light.movement > 0.18) {
+      if (light.saturation > 0.2 || light.movement > 0.12 || light.brightness < 0.2) {
         this.makeVoice(freq * 1.5, pan * -0.5, decay * 0.72, cutoff * 0.74, gainLevel * 0.34);
       }
       this.lastLightPulse = nowMs;

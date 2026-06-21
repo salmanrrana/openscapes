@@ -191,7 +191,7 @@
       root.classList.remove("is-sound-blocked");
       root.classList.add("is-sound-running");
       statePill.dataset.source = source;
-      startButton.textContent = "Soundscape running";
+      startButton.textContent = "Now listening";
       soundHint.textContent = "Click the field, drag slowly, or press Space to add a seed.";
       setStatus(state.muted ? "muted" : state.paused ? "paused" : "sound running");
       return true;
@@ -199,8 +199,8 @@
 
     root.classList.remove("is-sound-running");
     root.classList.add("is-sound-blocked");
-    startButton.textContent = "Enter OpenScape";
-    soundHint.textContent = "Autoplay was blocked. Press Enter OpenScape or click the field to start sound.";
+    startButton.textContent = "Wake it up";
+    soundHint.textContent = "Autoplay was blocked. Hit Wake it up or click the field to start sound.";
     setStatus("autoplay blocked");
     return false;
   }
@@ -242,7 +242,7 @@
   function dropSeed(x, y, intensity) {
     updatePointer(x, y);
     state.energy = Math.min(1, state.energy + 0.34 * intensity);
-    visualStage.addBloom(x, y, intensity);
+    visualStage.addLight(x, y, intensity);
     audioEngine.playAt(x, y, intensity);
     renderSignals();
   }
@@ -350,7 +350,6 @@
       this.ctx = targetCanvas.getContext("2d", { alpha: false });
       this.state = sharedState;
       this.particles = [];
-      this.blooms = [];
       this.trails = [];
       this.width = 0;
       this.height = 0;
@@ -428,28 +427,16 @@
       if (this.trails.length > 90) this.trails.splice(0, this.trails.length - 90);
     }
 
-    addBloom(x, y, intensity) {
-      const bloom = {
-        x,
-        y,
-        age: 0,
-        life: 2600 + this.state.random() * 2200,
-        intensity,
-        color: Math.floor((x / Math.max(1, this.width)) * this.palette.length) % this.palette.length,
-        spokes: []
-      };
-      const count = this.state.reducedMotion ? 18 : 42;
-      for (let i = 0; i < count; i += 1) {
-        bloom.spokes.push({
-          angle: this.state.random() * Math.PI * 2,
-          distance: 12 + this.state.random() * (70 + intensity * 135),
-          radius: 0.55 + this.state.random() * 2.2,
-          drift: (this.state.random() - 0.5) * 18,
-          color: Math.floor(this.state.random() * this.palette.length)
-        });
+    addLight(x, y, intensity) {
+      const drops = this.state.reducedMotion ? 1 : 3;
+      for (let i = 0; i < drops; i += 1) {
+        const spread = i === 0 ? 0 : 26;
+        this.addTrail(
+          x + (this.state.random() - 0.5) * spread,
+          y + (this.state.random() - 0.5) * spread,
+          0.55 + intensity * 0.45
+        );
       }
-      this.blooms.push(bloom);
-      if (this.blooms.length > 18) this.blooms.shift();
     }
 
     draw(now) {
@@ -472,7 +459,6 @@
 
       this.drawFog(ctx, t);
       this.drawParticles(ctx, t, delta);
-      this.drawBlooms(ctx, delta);
       this.drawTrails(ctx, delta);
 
       window.requestAnimationFrame(this.draw);
@@ -560,42 +546,6 @@
       }
     }
 
-    drawBlooms(ctx, delta) {
-      ctx.globalCompositeOperation = "lighter";
-      for (let i = this.blooms.length - 1; i >= 0; i -= 1) {
-        const bloom = this.blooms[i];
-        bloom.age += delta;
-        const progress = bloom.age / bloom.life;
-        if (progress >= 1) {
-          this.blooms.splice(i, 1);
-          continue;
-        }
-        const ease = 1 - Math.pow(1 - progress, 3);
-        const alpha = (1 - progress) * (0.34 + bloom.intensity * 0.28);
-        const mainColor = this.palette[bloom.color];
-        const radius = 18 + ease * (160 + bloom.intensity * 240);
-        const gradient = ctx.createRadialGradient(bloom.x, bloom.y, 0, bloom.x, bloom.y, radius);
-        gradient.addColorStop(0, `rgba(${mainColor[0]}, ${mainColor[1]}, ${mainColor[2]}, ${alpha})`);
-        gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(bloom.x, bloom.y, radius, 0, Math.PI * 2);
-        ctx.fill();
-
-        for (const spoke of bloom.spokes) {
-          const color = this.palette[spoke.color];
-          const distance = spoke.distance * ease;
-          const wobble = Math.sin(progress * Math.PI * 2 + spoke.drift) * 6;
-          const x = bloom.x + Math.cos(spoke.angle) * distance + wobble;
-          const y = bloom.y + Math.sin(spoke.angle) * distance - wobble;
-          ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha * 0.92})`;
-          ctx.beginPath();
-          ctx.arc(x, y, spoke.radius * (1 + progress * 1.8), 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-    }
-
     drawTrails(ctx, delta) {
       ctx.globalCompositeOperation = "lighter";
       for (let i = this.trails.length - 1; i >= 0; i -= 1) {
@@ -607,10 +557,15 @@
           continue;
         }
         const color = this.palette[trail.color];
-        const alpha = (1 - progress) * 0.22 * trail.intensity;
-        ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`;
+        const alpha = (1 - progress) * 0.32 * trail.intensity;
+        const radius = 4 + progress * (16 + trail.intensity * 34);
+        const gradient = ctx.createRadialGradient(trail.x, trail.y, 0, trail.x, trail.y, radius);
+        gradient.addColorStop(0, `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`);
+        gradient.addColorStop(0.55, `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha * 0.35})`);
+        gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+        ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.arc(trail.x, trail.y, 3 + progress * 20, 0, Math.PI * 2);
+        ctx.arc(trail.x, trail.y, radius, 0, Math.PI * 2);
         ctx.fill();
       }
     }
@@ -697,7 +652,7 @@
       setStatus(this.state.running ? "sound running" : "waiting for sound");
       soundHint.textContent = this.state.running
         ? "Click the field, drag slowly, or press Space to add a seed."
-        : "If the room is quiet, press Enter OpenScape or click the field.";
+        : "If the room is quiet, hit Wake it up or click the field.";
       renderSignals();
     }
 
@@ -743,7 +698,7 @@
         if (now - this.lastVisualBloom > 620 && (movement > 0.045 || brightness > 0.62 || saturation > 0.32)) {
           const x = (hue / 360) * window.innerWidth;
           const y = (1 - brightness) * window.innerHeight;
-          this.visualStage.addBloom(x, y, clamp(0.2 + movement * 2.8 + saturation * 0.38, 0.2, 0.94));
+          this.visualStage.addLight(x, y, clamp(0.2 + movement * 2.8 + saturation * 0.38, 0.2, 0.94));
           this.lastVisualBloom = now;
         }
 

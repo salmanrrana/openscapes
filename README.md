@@ -1,6 +1,6 @@
 # OpenScapes
 
-A simple static browser art installation. OpenScapes turns local no-permission browser signals into a drifting ambient soundscape and pointillist cosmic fog. An optional Light instrument can sample camera brightness and color after permission, then fold that light into the drones, notes, and blooms.
+**Your computer is alive.** OpenScapes is a static browser art installation that turns the no-permission signals which make your machine unique — load timing, screen shape, CPU cores, memory, connection quality, clock drift, performance jitter, and pointer motion — into a drifting ambient soundscape and pointillist cosmic fog. No two devices sound the same. An optional Light instrument can sample camera brightness and color after permission, then fold that light into the drones, notes, and blooms.
 
 ## Run locally
 

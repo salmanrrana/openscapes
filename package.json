@@ -4,6 +4,11 @@
   "description": "A static browser audio installation generated from local no-permission signals.",
   "type": "module",
   "scripts": {
+    "prepare": "node tools/install-hooks.mjs",
+    "check:staged": "node tools/check-staged.mjs",
+    "lint": "eslint site tools eslint.config.mjs",
+    "format:check": "prettier --check package.json eslint.config.mjs tools/install-hooks.mjs",
+    "check:fast": "npm run lint && npm run format:check && npm test",
     "dev": "python3 -m http.server 5173 --directory site",
     "build": "node --check site/app.js && node tools/check-static.mjs",
     "test": "npm run build"
@@ -15,5 +20,11 @@
     "static-site"
   ],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
+    "prettier": "^3.8.2"
+  }
 }

@@ -8,6 +8,10 @@
 npm run dev
 ```
 
+Run `npm install` once, then `npm run check:fast` for ESLint and the existing
+static file, asset-reference, and CSS-token assertions. Installation enables
+the tracked pre-commit hook; Prettier checks supported staged files.
+
 Open http://localhost:5173.
 
 ## Build check
